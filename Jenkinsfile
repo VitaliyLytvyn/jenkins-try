@@ -6,6 +6,11 @@ pipeline {
         // Define environment variables here
         NEW_VERSION = '1.3.0'
     }
+    parameters {
+        string(name: 'APP_NAME', defaultValue: 'MyApp', description: 'Name of the application')
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'test', 'prod'], description: 'Deployment environment')
+        booleanParam(name: 'ENABLE_FEATURE_X', defaultValue: true, description: 'Enable Feature X?')
+    }
     stages {
         stage('build') {
             steps {
@@ -16,6 +21,9 @@ pipeline {
             }
         }
         stage('test') {
+            when {
+                expression { params.ENABLE_FEATURE_X }
+            }
             steps {
                 script {
                     echo "Testing the application..."
@@ -26,6 +34,7 @@ pipeline {
             steps {
                 script {
                     echo "Deploying the application..."
+                    echo "Deploying the application: ${params.APP_NAME} to ${params.ENVIRONMENT} environment"
                     // Example of using credentials
                     withCredentials([
                         usernamePassword(credentialsId: 'docker_hub_id', 
